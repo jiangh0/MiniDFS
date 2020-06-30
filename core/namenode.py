@@ -83,11 +83,14 @@ class NameNode(threading.Thread):
                 sock.close()
                 continue
             closed_dataserver.append(i)
-        print('id\tname\tsize\t\tchunk\tchunk_server')
+        print('id\tname\t\tsize\tchunk\t\tchunk_server')
         for id, chunk_list in self.id_chunk_map.items():
-            for chunk in chunk_list:
+            file_length = self.id_file_map[id][1]
+            num = len(chunk_list)
+            chunk_size_list = [CHUNK_SIZE if i+1 < num else file_length%CHUNK_SIZE for i in range(num)]
+            for chunk, chunk_size in zip(chunk_list, chunk_size_list):
                 chunk_server_list = [-1  if i in closed_dataserver else i for i in self.chunk_server_map[chunk]]
-                print('%s\t%s\t%s\t%s\t%s' % (id, self.id_file_map[id][0], self.id_file_map[id][1], chunk, chunk_server_list))
+                print('%s\t%s\t%s\t%s\t%s' % (id, self.id_file_map[id][0], chunk_size, chunk, chunk_server_list))
 
 
     def put(self):
